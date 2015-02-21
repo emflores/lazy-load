@@ -1,4 +1,4 @@
-var win      = window || {};
+var win      = require( './util' ).win;
 var _reduce  = require( 'lodash-node/compat/collection/reduce' );
 var _forEach = require( 'lodash-node/compat/collection/forEach' );
 
@@ -22,9 +22,9 @@ function getOffset ( elem ) {
 function getBottomOffset () {
     var scrollTop       = win.document.body.scrollTop;
     var viewPortHeight  = win.innerHeight;
-    var newBottomOffset = scrollTop + viewPortHeight
+    var newBottomOffset = scrollTop + viewPortHeight;
 
-    // If the user is scroll upward, return undefined. This will
+    // If the user is scrolling upward, return undefined. This will
     // result in a short circuit within the handleScroll method.
     if ( newBottomOffset < bottomOffset ) {
         return;
@@ -43,7 +43,7 @@ function getCacheStructure () {
     return {
         loaded: false,
         elems:  []
-    }
+    };
 }
 
 function mapOffsets ( elems ) {
@@ -104,4 +104,6 @@ module.exports.init = function ( imageSel, attrKey ) {
     var imageOffsets = mapOffsets( images );
 
     bindScrollHandler( imageOffsets, attrKey );
+
+    return imageOffsets;
 };
