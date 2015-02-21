@@ -1,7 +1,6 @@
 var win      = window || {};
-var _reduce  = require( 'lodash/collection/reduce' );
-var _forEach = require( 'lodash/collection/forEach' );
-var _clone   = require( 'lodash/lang/clone' );
+var _reduce  = require( 'lodash-node/compat/collection/reduce' );
+var _forEach = require( 'lodash-node/compat/collection/forEach' );
 
 // Constants
 var DEFAULTS = {
@@ -9,10 +8,8 @@ var DEFAULTS = {
     ATTR_KEY:  'data-src'
 };
 
-var CACHE_STRUCTURE = {
-    loaded: false,
-    elems:  []
-};
+// Cache
+var bottomOffset = null;
 
 function getImages ( sel ) {
     return win.document.querySelectorAll( sel );
@@ -23,27 +20,41 @@ function getOffset ( elem ) {
 }
 
 function getBottomOffset () {
-    var scrollTop      = win.document.body.scrollTop;
-    var viewportHeight = win.innerHeight;
+    var scrollTop       = win.document.body.scrollTop;
+    var viewPortHeight  = win.innerHeight;
+    var newBottomOffset = scrollTop + viewPortHeight
 
-    return scrollTop + viewPortHeight;
+    // If the user is scroll upward, return undefined. This will
+    // result in a short circuit within the handleScroll method.
+    if ( newBottomOffset < bottomOffset ) {
+        return;
+    }
+
+    bottomOffset = newBottomOffset;
+
+    return newBottomOffset;
 }
 
 function getAttr ( elem, key ) {
     return elem.getAttribute( key );
 }
 
-function mapOffsets ( elems ) {
-    var elemCount = elems.length;
+function getCacheStructure () {
+    return {
+        loaded: false,
+        elems:  []
+    }
+}
 
+function mapOffsets ( elems ) {
     return _reduce( elems, function ( obj, elem ) {
-        var offset = getOffset( val );
+        var offset = getOffset( elem );
 
         if ( !obj.hasOwnProperty( offset ) ) {
-            obj[ offset ] = _clone( CACHE_STRUCTURE );
+            obj[ offset ] = getCacheStructure();
         }
 
-        obj[ offset ].push( elem );
+        obj[ offset ].elems.push( elem );
 
         return obj;
     }, {} );
@@ -62,12 +73,12 @@ function loadImages ( elems, attrKey ) {
 }
 
 function handleScroll ( imageOffsets, bottomOffset, attrKey ) {
-    _forEach( imageOffsets, function ( val, key ) {
-        if ( val.loaded ) {
-            return false;
-        }
+    if ( !bottomOffset ) {
+        return;
+    }
 
-        if ( key <= bottomOffset ) {
+    _forEach( imageOffsets, function ( val, key ) {
+        if ( !val.loaded && key <= bottomOffset ) {
             loadImages( val.elems, attrKey );
             val.loaded = true;
         }
