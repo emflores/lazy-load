@@ -20,5 +20,11 @@
   "bugs": {
     "url": "https://github.com/emflores/lazy-load/issues"
   },
-  "homepage": "https://github.com/emflores/lazy-load"
+  "homepage": "https://github.com/emflores/lazy-load",
+  "devDependencies": {
+    "should": "^5.0.0"
+  },
+  "dependencies": {
+    "lodash-node": "^3.3.0"
+  }
 }
