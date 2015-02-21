@@ -9,7 +9,7 @@ var DEFAULTS = {
 };
 
 // Cache
-var bottomOffset = null;
+var bottomOffset = 0;
 
 function getImages ( sel ) {
     return win.document.querySelectorAll( sel );

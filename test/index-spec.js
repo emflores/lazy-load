@@ -2,15 +2,19 @@ require( 'should' );
 var proxyquire = require( 'proxyquire' ).noCallThru();
 var sinon      = require( 'sinon' );
 var _forEach   = require( 'lodash-node/compat/collection/forEach' );
+var _clone     = require( 'lodash-node/compat/lang/clone' );
 var _noop      = require( 'lodash-node/compat/utility/noop' );
 
 // Fixtures
-var elems       = require( './fixtures' ).elems;
-var mappedElems = require( './fixtures' ).mappedElems;
+var elems             = require( './fixtures' ).elems;
+var mappedElems       = require( './fixtures' ).mappedElems;
+var singlePixelScroll = require( './fixtures' ).singlePixelScroll;
 
 // Spies
 var spies = {
-    addEventListener: sinon.spy()
+    addEventListener: sinon.spy( function ( ev, cb ) {
+        cb();
+    })
 };
 
 function getLib ( overrides ) {
@@ -21,10 +25,14 @@ function getLib ( overrides ) {
             win: {
                 document: {
                     querySelectorAll: overrides.qsa || function () {
-                        return elems;
+                        return _clone( elems );
+                    },
+                    body: {
+                        scrollTop: overrides.scrollTop || 0
                     }
                 },
-                addEventListener: spies.addEventListener
+                addEventListener: spies.addEventListener,
+                innerHeight: overrides.innerHeight || 1
             }
         }
     });
@@ -63,6 +71,16 @@ describe( 'Lazy Load', function () {
     });
 
     describe( 'Scroll Handler', function () {
+        it( 'Only loads images in the view port', function () {
+            lib = getLib({
+                scrollTop: 1
+            });
 
+            lib.init().should.eql( singlePixelScroll );
+            lib.init()[ 2 ].elems[ 0 ].src.should.equal( '/foo.html' );
+            lib.init()[ 2 ].elems[ 1 ].src.should.equal( '/foo.html' );
+            ( typeof lib.init()[ 3 ].elems[ 0 ].src ).should.equal( 'undefined' );
+            ( typeof lib.init()[ 4 ].elems[ 0 ].src ).should.equal( 'undefined' );
+        });
     });
 });

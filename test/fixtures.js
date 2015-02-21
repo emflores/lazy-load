@@ -1,21 +1,47 @@
-module.exports.elems = [
-    { offsetTop: 1 },
-    { offsetTop: 1 },
-    { offsetTop: 2 },
-    { offsetTop: 3 }
-];
+var _assign = require( 'lodash-node/compat/object/assign' );
+
+var baseElem = {
+    getAttribute: function ( key ) {
+        return this[ key ];
+    },
+    setAttribute: function ( key, val ) {
+        this[ key ] = val;
+    },
+    'data-src': '/foo.html'
+};
+var elemA = _assign( { offsetTop: 2 }, baseElem );
+var elemB = _assign( { offsetTop: 2 }, baseElem );
+var elemC = _assign( { offsetTop: 3 }, baseElem );
+var elemD = _assign( { offsetTop: 4 }, baseElem );
+
+module.exports.elems = [ elemA, elemB, elemC, elemD ];
 
 module.exports.mappedElems = {
-    1: {
-        loaded: false,
-        elems:  [ { offsetTop: 1 }, { offsetTop: 1 } ]
-    },
     2: {
         loaded: false,
-        elems:  [ { offsetTop: 2 } ]
+        elems:  [ elemA, elemB ]
     },
     3: {
         loaded: false,
-        elems:  [ { offsetTop: 3 } ]
+        elems:  [ elemC ]
+    },
+    4: {
+        loaded: false,
+        elems:  [ elemD ]
+    }
+};
+
+module.exports.singlePixelScroll = {
+    2: {
+        loaded: true,
+        elems:  [ elemA, elemB ]
+    },
+    3: {
+        loaded: false,
+        elems:  [ elemC ]
+    },
+    4: {
+        loaded: false,
+        elems:  [ elemD ]
     }
 };
